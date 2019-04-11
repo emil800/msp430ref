@@ -42,5 +42,5 @@ typedef enum Port_Enum{
 
 
 /*Set PWM output on specified port*/
-char SetPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char perid);
+char SetHWPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char perid);
 #endif

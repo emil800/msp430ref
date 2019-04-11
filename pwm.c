@@ -17,7 +17,7 @@
 
 
 
-char SetPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char period)
+char SetHWPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char period)
 {
     unsigned int highTime;
     unsigned int periodX8 = period * 8;
