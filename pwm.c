@@ -17,7 +17,7 @@
 
 
 
-char SetHWPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char period)
+char SetPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char period)
 {
     unsigned int highTime;
     unsigned int periodX8 = period * 8;
@@ -74,17 +74,23 @@ char SetHWPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char period)
         TA0CCTL1 = OUTMOD_7;
         TA0CTL = TASSEL_2 + MC_1; // SMCLK, up mode
         break;
+    case P2_6:
+        P2DIR |= BIT6;/*Select direction*/
+        P2SEL |= BIT6;
+        P2SEL2 &= (~BIT6);
+        P2SEL  &= (~BIT7);
+        P2SEL2 &= (~BIT7);
+        TA0CCR0 = periodX8;/*Period*/
+        TA0CCR1 = highTime; /*On time*/
+        TA0CCTL1 = OUTMOD_7;
+        TA0CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        break;
     default:
         //#error  Selected port is not a valid PWM port.
        break;
 
-
-
-return 0;
-
-
     }
 
-
+return 0;
 
 }

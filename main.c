@@ -18,7 +18,7 @@ int main(void)
     char a,b;
     PWMPorts port1 = P2_2;
     PWMPorts port2 = P2_5;
-    PWMPorts port3 = P1_6;
+    PWMPorts port3 = P2_6;
     unsigned char d1 = 1;
     unsigned char d2 = 100;
     unsigned char d3 = 200;
