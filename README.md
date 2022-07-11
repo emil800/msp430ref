@@ -1,6 +1,6 @@
 # msp430ref
 
-![plot](./img/msp-exp430g2et.svg)
+![plot](./img/msp430G2x53_pins.png)
 
 # Compiler
 
