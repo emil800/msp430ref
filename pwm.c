@@ -19,6 +19,7 @@
 
 char SetPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char period)
 {
+    unsigned int ret;
     unsigned int highTime;
     unsigned int periodX8 = period * 8;
     highTime = (unsigned int)(8 * duty_Q8);
@@ -33,6 +34,7 @@ char SetPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char period)
         TA0CCR1 = highTime; /*On time*/
         TA0CCTL1 = OUTMOD_7;
         TA0CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        ret = 1;
         break;
     case P2_1:
         P2DIR |= BIT1;/*Select direction*/
@@ -41,6 +43,7 @@ char SetPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char period)
         TA1CCR1 = highTime; /*On time*/
         TA1CCTL1 = OUTMOD_7;
         TA1CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        ret = 1;
         break;
     case P2_2:
         P2DIR |= BIT2;/*Select direction*/
@@ -49,6 +52,7 @@ char SetPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char period)
         TA1CCR1 = highTime; /*On time*/
         TA1CCTL1 = OUTMOD_7;
         TA1CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        ret = 1;
         break;
     case P2_4:
         P2DIR |= BIT4;/*Select direction*/
@@ -57,6 +61,7 @@ char SetPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char period)
         TA1CCR2 = highTime; /*On time*/
         TA1CCTL2 = OUTMOD_7;
         TA1CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        ret = 1;
         break;
     case P2_5:
         P2DIR |= BIT5;/*Select direction*/
@@ -65,6 +70,7 @@ char SetPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char period)
         TA1CCR2 = highTime; /*On time*/
         TA1CCTL2 = OUTMOD_7;
         TA1CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        ret = 1;
         break;
     case P1_6:
         P1DIR |= BIT6;/*Select direction*/
@@ -73,6 +79,7 @@ char SetPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char period)
         TA0CCR1 = highTime; /*On time*/
         TA0CCTL1 = OUTMOD_7;
         TA0CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        ret = 1;
         break;
     case P2_6:
         P2DIR |= BIT6;/*Select direction*/
@@ -84,13 +91,15 @@ char SetPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char period)
         TA0CCR1 = highTime; /*On time*/
         TA0CCTL1 = OUTMOD_7;
         TA0CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        ret = 1;
         break;
     default:
         //#error  Selected port is not a valid PWM port.
+        ret = 0;
        break;
 
     }
 
-return 0;
+return ret;
 
 }
