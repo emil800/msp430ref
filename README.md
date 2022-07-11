@@ -1,5 +1,7 @@
 # msp430ref
 
+![plot](./img/msp-exp430g2et.svg)
+
 # Compiler
 
 Install compiler:
