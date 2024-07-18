@@ -4,17 +4,19 @@
 
 # Compiler
 
-Install compiler:
+### Install compiler:
 
-sudo apt install gcc-msp430 
+sudo apt install gcc-msp430
 
-Build:
+### Build:
 
-msp430-gcc -mmcu=msp430g2553 main.c pwm.c -o main.out
+- with make
+  make all
+- with gcc
+  msp430-gcc -mmcu=msp430g2553 main.c pwm.c -o main.out
 
-# Debugger/Flash 
+# Debugger/Flash
 
-mspdebug rf2500
-prog main.o
+Required - Debugger from https://dlbeer.co.nz/mspdebug/
 
-
+./flash.sh
