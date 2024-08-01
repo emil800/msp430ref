@@ -28,73 +28,73 @@ char SetPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char period)
     switch(port)
     {
     case P1_2:
-        P1DIR |= BIT2;/*Select direction*/
-        P1SEL |= BIT2;
-        TA0CCR0 = periodX8;/*Period*/
-        TA0CCR1 = highTime; /*On time*/
-        TA0CCTL1 = OUTMOD_7;
-        TA0CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        P1DIR |= BIT2;              /* Select direction */
+        P1SEL |= BIT2;              /* Function*/
+        TA0CCR0 = periodX8;         /* Period */
+        TA0CCR1 = highTime;         /* On time*/
+        TA0CCTL1 = OUTMOD_7;        /* 111 Reset/Set The output is reset when the time */
+        TA0CTL = TASSEL_2 + MC_1;   /* SMCLK, up mode */
         ret = 1;
         break;
     case P2_1:
-        P2DIR |= BIT1;/*Select direction*/
+        P2DIR |= BIT1;           
         P2SEL |= BIT1;
-        TA1CCR0 = periodX8;/*Period*/
-        TA1CCR1 = highTime; /*On time*/
+        TA1CCR0 = periodX8;
+        TA1CCR1 = highTime; 
         TA1CCTL1 = OUTMOD_7;
-        TA1CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        TA1CTL = TASSEL_2 + MC_1; 
         ret = 1;
         break;
     case P2_2:
-        P2DIR |= BIT2;/*Select direction*/
+        P2DIR |= BIT2;
         P2SEL |= BIT2;
-        TA1CCR0 = periodX8;/*Period*/
-        TA1CCR1 = highTime; /*On time*/
+        TA1CCR0 = periodX8;
+        TA1CCR1 = highTime;
         TA1CCTL1 = OUTMOD_7;
-        TA1CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        TA1CTL = TASSEL_2 + MC_1; 
         ret = 1;
         break;
     case P2_4:
-        P2DIR |= BIT4;/*Select direction*/
+        P2DIR |= BIT4;
         P2SEL |= BIT4;
-        TA1CCR0 = periodX8;/*Period*/
-        TA1CCR2 = highTime; /*On time*/
+        TA1CCR0 = periodX8;
+        TA1CCR2 = highTime;
         TA1CCTL2 = OUTMOD_7;
-        TA1CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        TA1CTL = TASSEL_2 + MC_1; 
         ret = 1;
         break;
     case P2_5:
-        P2DIR |= BIT5;/*Select direction*/
+        P2DIR |= BIT5;
         P2SEL |= BIT5;
-        TA1CCR0 = periodX8;/*Period*/
-        TA1CCR2 = highTime; /*On time*/
+        TA1CCR0 = periodX8;
+        TA1CCR2 = highTime;
         TA1CCTL2 = OUTMOD_7;
-        TA1CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        TA1CTL = TASSEL_2 + MC_1;
         ret = 1;
         break;
     case P1_6:
-        P1DIR |= BIT6;/*Select direction*/
+        P1DIR |= BIT6;
         P1SEL |= BIT6;
-        TA0CCR0 = periodX8;/*Period*/
-        TA0CCR1 = highTime; /*On time*/
+        TA0CCR0 = periodX8;
+        TA0CCR1 = highTime;
         TA0CCTL1 = OUTMOD_7;
-        TA0CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        TA0CTL = TASSEL_2 + MC_1;
         ret = 1;
         break;
     case P2_6:
-        P2DIR |= BIT6;/*Select direction*/
+        P2DIR |= BIT6;
         P2SEL |= BIT6;
         P2SEL2 &= (~BIT6);
         P2SEL  &= (~BIT7);
         P2SEL2 &= (~BIT7);
-        TA0CCR0 = periodX8;/*Period*/
-        TA0CCR1 = highTime; /*On time*/
+        TA0CCR0 = periodX8;
+        TA0CCR1 = highTime;
         TA0CCTL1 = OUTMOD_7;
-        TA0CTL = TASSEL_2 + MC_1; // SMCLK, up mode
+        TA0CTL = TASSEL_2 + MC_1;
         ret = 1;
         break;
     default:
-        //#error  Selected port is not a valid PWM port.
+        /* Selected port is not a valid PWM port. */
         ret = 0;
        break;
 
