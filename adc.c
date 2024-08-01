@@ -4,8 +4,8 @@
  *
  *
  *
- *
- *
+ * ADC sequence converation starts from the highest configured pin
+ * So when reading from buffer (adc[6]) index is inverted.
  *
  *
  *
@@ -23,13 +23,17 @@ char ConfigureADC(ADC_Channel ch)
     switch(ch)
     {
     case A0:
-			ADC10CTL1 = INCH_0 + CONSEQ_1; // CH0, sequence conversation once
+			P1REN |=  BIT0; 				/* Enable resistor */
+			P1OUT &= (~BIT0); 				/* Pull down */
+			ADC10CTL1 = INCH_0 + CONSEQ_1;  // CH0, sequence conversation once
 			ADC10CTL0 = ADC10SHT_2 + MSC + ADC10ON + ADC10IE;
-			ADC10DTC1 = 0x01;              // 1 conversions
-			ADC10AE0 |= 0x01;              // Enable analog input on P1.0
+			ADC10DTC1 = 0x01;               // 1 conversions
+			ADC10AE0 |= 0x01;               // Enable analog input on P1.0
 			ret = 1;
         	break;
     case A1:
+			P1REN |=  BIT1; 				/* Enable resistor */
+			P1OUT &= (~BIT1); 				/* Pull down */					/* Pull down */
 			ADC10CTL1 = INCH_1 + CONSEQ_1; // CH1, sequence conversation once
 			ADC10CTL0 = ADC10SHT_2 + MSC + ADC10ON + ADC10IE;
 			ADC10DTC1 = 0x02;              // 2 conversions
@@ -37,6 +41,8 @@ char ConfigureADC(ADC_Channel ch)
 			ret = 1;
         break;
     case A2:
+			P1REN |=  BIT2; 				/* Enable resistor */
+			P1OUT &= (~BIT2); 				/* Pull down */
 			ADC10CTL1 = INCH_2 + CONSEQ_1; // CH0, sequence conversation once
 			ADC10CTL0 = ADC10SHT_2 + MSC + ADC10ON + ADC10IE;
 			ADC10DTC1 = 0x03;              // 3 conversions
@@ -44,6 +50,8 @@ char ConfigureADC(ADC_Channel ch)
 			ret = 1;
         break;
     case A3:
+			P1REN |=  BIT3; 				/* Enable resistor */
+			P1OUT &= (~BIT3); 				/* Pull down */
 			ADC10CTL1 = INCH_3 + CONSEQ_1; // CH0, sequence conversation once
 			ADC10CTL0 = ADC10SHT_2 + MSC + ADC10ON + ADC10IE;
 			ADC10DTC1 = 0x04;              // 4 conversions
@@ -51,6 +59,8 @@ char ConfigureADC(ADC_Channel ch)
 			ret = 1;
         break;
     case A4:
+			P1REN |=  BIT4; 				/* Enable resistor */
+			P1OUT &= (~BIT4); 				/* Pull down */
 			ADC10CTL1 = INCH_4 + CONSEQ_1; // CH4, sequence conversation once
 			ADC10CTL0 = ADC10SHT_2 + MSC + ADC10ON + ADC10IE;
 			ADC10DTC1 = 0x05;              // 5 conversions
@@ -58,6 +68,8 @@ char ConfigureADC(ADC_Channel ch)
 			ret = 1;
         break;
     case A5:
+			P1REN |=  BIT5; 				/* Enable resistor */
+			P1OUT &= (~BIT5); 				/* Pull down */
 			ADC10CTL1 = INCH_5 + CONSEQ_1; // CH5, sequence conversation once
 			ADC10CTL0 = ADC10SHT_2 + MSC + ADC10ON + ADC10IE;
 			ADC10DTC1 = 0x06;              // 6 conversions
