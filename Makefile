@@ -21,7 +21,7 @@ BIN_DIR = $(ROOT)/bin
 # Files
 ###########################################################
 TARGET = $(BIN_DIR)/main.elf
-SOURCES = main.c pwm.c adc.c #$(wildcard *.c)
+SOURCES = main.c pwm.c adc.c flash.c #$(wildcard *.c)
 OBJECT_NAMES = $(SOURCES:.c=.o)
 OBJECTS = $(patsubst %,$(OBJ_DIR)/%,$(OBJECT_NAMES))
 

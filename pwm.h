@@ -1,59 +1,47 @@
 /*
+ * Hardware PWM on MSP430G2553 Timer_A outputs.
  *
+ *  Pin      Timer / CCR
+ *  P1.2     TA0.1 (TA0CCR1)
+ *  P1.6     TA0.1 (TA0CCR1)     shared with P1.2
+ *  P2.1     TA1.1 (TA1CCR1)
+ *  P2.2     TA1.1 (TA1CCR1)     shared with P2.1
+ *  P2.4     TA1.2 (TA1CCR2)
+ *  P2.5     TA1.2 (TA1CCR2)     shared with P2.4
+ *  P2.6     TA0.1 (TA0CCR1)     shared with P1.2 / P1.6
  *
+ *  Ports that share a CCR register cannot carry independent duty cycles.
  *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
-    P1.1 - TA0.0 - TA0CCR0
-    P1.2 - TA0.1 - TA0CCR1
-    P1.5 - TA0.0 - TA0CCR0
-    P1.6 - TA0.1 - TA0CCR1
-    P2.0 - TA1.0 - TA1CCR0
-    P2.1 - TA1.1 - TA1CCR1
-    P2.2 - TA1.1 - TA1CCR1
-    P2.3 - TA1.0 - TA1CCR0
-    P2.4 - TA1.2 - TA1CCR2
-    P2.5 - TA1.2 - TA1CCR2
-    P2,6 - TA0.1 - TA0CCR1
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- * */
+ *  TA0.1 — one of P1_2 / P1_6 / P2_6
+ *  TA1.1 — one of P2_1 / P2_2
+ *  TA1.2 — one of P2_4 / P2_5
+ */
 
 #ifndef PWM_H_
 #define PWM_H_
-/*PWM enabled pins on msp430g2*/
-typedef enum Port_Enum{
-    P1_2,/*TA0.1*/
-    P2_1,/*TA1.1*/
-    P2_2,/*TA1.1*/
-    P2_4,/*TA1.2*/
-    P2_5,/*TA1.2*/
-    P1_6,/*TA0.1*/
-    P2_6,/*TA0.1*/
+
+#include <stdint.h>
+
+typedef enum Port_Enum {
+    P1_2,
+    P2_1,
+    P2_2,
+    P2_4,
+    P2_5,
+    P1_6,
+    P2_6,
+    PWM_PORT_COUNT
 } PWMPorts;
 
+/* Configure pin direction, function-select, and Timer_A once.
+ * period sets CCR0 via period * 8 timer ticks. */
+char PWM_Configure(PWMPorts port, uint16_t period);
 
+/* Update duty only. Must be preceded by PWM_Configure(port, ...).
+ * duty_Q8 maps 0..0xFF to 0..period. */
+char PWM_SetDuty(PWMPorts port, uint8_t duty_Q8);
 
-/*Set PWM output on specified port*/
-char SetPWMOut(PWMPorts port, unsigned char duty_Q8, unsigned char perid);
-#endif
+/* Backward-compatible one-shot: Configure + SetDuty. */
+char SetPWMOut(PWMPorts port, uint8_t duty_Q8, uint16_t period);
+
+#endif /* PWM_H_ */

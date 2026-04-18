@@ -1,64 +1,71 @@
 #include <msp430.h>
+#include <stdint.h>
+
 #include "pwm.h"
 #include "adc.h"
-// Global variables
-char duty = 0;
-// Function prototypes
-void init(void);
-void test_HWPWM(void);
+#include "flash.h"
+
+#define SETTINGS_SEG    FLASH_INFOD
+#define SETTINGS_MAGIC  0xA55Au
+
+typedef struct {
+    uint16_t magic;
+    uint8_t  duty_1;
+    uint8_t  duty_2;
+    uint16_t pwm_period;
+} settings_t;
+
+static settings_t settings;
+
+static void init(void);
+static void load_or_init_settings(void);
 
 int main(void)
 {
-	ADC_Channel channel0 = A0;
-	init();
-   
+    init();
+    load_or_init_settings();
 
-    while(1)
-    {
+    PWM_Configure(P2_1, settings.pwm_period);
+    PWM_Configure(P2_4, settings.pwm_period);
+    PWM_Configure(P2_6, settings.pwm_period);
 
-		duty = (char)(GetADCValue(channel0) >> 2);
-		test_HWPWM();
+    PWM_SetDuty(P2_1, settings.duty_1);
+    PWM_SetDuty(P2_4, settings.duty_2);
 
+    while (1) {
+        /* ADC10 is 10-bit; map to 8-bit duty. */
+        uint8_t duty_3 = (uint8_t)(GetADCValue(A0) >> 2);
+        PWM_SetDuty(P2_6, duty_3);
     }
-
-   __bis_SR_register(LPM0_bits + GIE); /* Goto LPM3 (CPU, MCLK are disabled, 
-   													SMCLK, ACLK are active), Enable CPU Interrupt */
 }
 
-void init(void)
+static void init(void)
 {
+    WDTCTL = WDTPW | WDTHOLD;
 
-    WDTCTL = WDTPW + WDTHOLD;           // Stop watchdog timer
-    
-    /* Configure the clock module - MCLK = 1MHz */
-    DCOCTL = 0;
+    DCOCTL  = 0;
     BCSCTL1 = CALBC1_1MHZ;
-    DCOCTL = CALDCO_1MHZ;
-    
-    //Configure CH0 
-    ADC_Channel channel0 = A0;
-	 ConfigureADC(channel0);
+    DCOCTL  = CALDCO_1MHZ;
 
+    ConfigureADC(A0);
+    ConfigureADC(A1);
+    ConfigureADC(A2);
+    ConfigureADC(A3);
+
+    Flash_Init();
 }
 
-void test_HWPWM(void)
+static void load_or_init_settings(void)
 {
+    Flash_Read(SETTINGS_SEG, 0, &settings, sizeof settings);
 
-    char a,b;
-    PWMPorts port1 = P2_1;
-    PWMPorts port2 = P2_4;
-    PWMPorts port3 = P2_6;
-    
-    unsigned char d1 = 10;
-    unsigned char d2 = 50;
-    unsigned char d3 = duty;
-    unsigned int  f 	= 255;
+    if (settings.magic != SETTINGS_MAGIC) {
+        settings.magic      = SETTINGS_MAGIC;
+        settings.duty_1     = 0xDD;
+        settings.duty_2     = 0xEE;
+        settings.pwm_period = 255;
 
-
-    a = SetPWMOut(port1,d1,f);
-    a = SetPWMOut(port2,d2,f);
-    a = SetPWMOut(port3,d3,f);
-
+        Flash_EraseSegment(SETTINGS_SEG);
+        Flash_Write(SETTINGS_SEG, 0, &settings, sizeof settings);
+    }
 }
-
-

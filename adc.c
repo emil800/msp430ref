@@ -1,129 +1,80 @@
 /**
+ * ADC10, CONSEQ_1 (single sequence of channels, A_highest..A0).
  *
- *
- *
- *
- *
- * ADC sequence converation starts from the highest configured pin
- * So when reading from buffer (adc[6]) index is inverted.
- *
- *
- *
- *
+ * Design notes:
+ *  - ConfigureADC() can be called multiple times; it accumulates the set of
+ *    requested channels and reprograms the sequencer to span A_highest..A0.
+ *  - ADC10 CONSEQ_1 converts from INCHx down to A0 and the DTC writes the
+ *    samples into adc_buf[] in the order they are produced. So the first
+ *    sample in the buffer is for the highest channel; GetADCValue() reverses
+ *    that.
+ *  - GetADCValue() triggers a fresh sequence and waits for completion, so it
+ *    always returns a current sample rather than a stale one.
  */
 
 #include "adc.h"
 #include <msp430.h>
+#include <stdint.h>
 
-unsigned int adc[6] = {0};	// This will hold the adc values
+#define ADC_MAX_CHANNELS 6u
+
+static volatile uint16_t adc_buf[ADC_MAX_CHANNELS];
+static uint8_t           cfg_mask;
+static uint8_t           highest_ch;
+
+static void recompute_highest(void)
+{
+    highest_ch = 0;
+    for (int8_t i = ADC_MAX_CHANNELS - 1; i >= 0; i--) {
+        if (cfg_mask & (uint8_t)(1u << i)) {
+            highest_ch = (uint8_t)i;
+            break;
+        }
+    }
+}
 
 char ConfigureADC(ADC_Channel ch)
 {
-	unsigned int ret;
-    switch(ch)
-    {
-    case A0:
-			P1REN |=  BIT0; 				/* Enable resistor */
-			P1OUT &= (~BIT0); 				/* Pull down */
-			ADC10CTL1 = INCH_0 + CONSEQ_1;  // CH0, sequence conversation once
-			ADC10CTL0 = ADC10SHT_2 + MSC + ADC10ON + ADC10IE;
-			ADC10DTC1 = 0x01;               // 1 conversions
-			ADC10AE0 |= 0x01;               // Enable analog input on P1.0
-			ret = 1;
-        	break;
-    case A1:
-			P1REN |=  BIT1; 				/* Enable resistor */
-			P1OUT &= (~BIT1); 				/* Pull down */					/* Pull down */
-			ADC10CTL1 = INCH_1 + CONSEQ_1; // CH1, sequence conversation once
-			ADC10CTL0 = ADC10SHT_2 + MSC + ADC10ON + ADC10IE;
-			ADC10DTC1 = 0x02;              // 2 conversions
-			ADC10AE0 |= 0x02;              // Enable analog input on P1.1
-			ret = 1;
-        break;
-    case A2:
-			P1REN |=  BIT2; 				/* Enable resistor */
-			P1OUT &= (~BIT2); 				/* Pull down */
-			ADC10CTL1 = INCH_2 + CONSEQ_1; // CH0, sequence conversation once
-			ADC10CTL0 = ADC10SHT_2 + MSC + ADC10ON + ADC10IE;
-			ADC10DTC1 = 0x03;              // 3 conversions
-			ADC10AE0 |= 0x03;              // Enable analog input on P1.2
-			ret = 1;
-        break;
-    case A3:
-			P1REN |=  BIT3; 				/* Enable resistor */
-			P1OUT &= (~BIT3); 				/* Pull down */
-			ADC10CTL1 = INCH_3 + CONSEQ_1; // CH0, sequence conversation once
-			ADC10CTL0 = ADC10SHT_2 + MSC + ADC10ON + ADC10IE;
-			ADC10DTC1 = 0x04;              // 4 conversions
-			ADC10AE0 |= 0x04;              // Enable analog input on P1.3
-			ret = 1;
-        break;
-    case A4:
-			P1REN |=  BIT4; 				/* Enable resistor */
-			P1OUT &= (~BIT4); 				/* Pull down */
-			ADC10CTL1 = INCH_4 + CONSEQ_1; // CH4, sequence conversation once
-			ADC10CTL0 = ADC10SHT_2 + MSC + ADC10ON + ADC10IE;
-			ADC10DTC1 = 0x05;              // 5 conversions
-			ADC10AE0 |= 0x05;              // Enable analog input on P1.4
-			ret = 1;
-        break;
-    case A5:
-			P1REN |=  BIT5; 				/* Enable resistor */
-			P1OUT &= (~BIT5); 				/* Pull down */
-			ADC10CTL1 = INCH_5 + CONSEQ_1; // CH5, sequence conversation once
-			ADC10CTL0 = ADC10SHT_2 + MSC + ADC10ON + ADC10IE;
-			ADC10DTC1 = 0x06;              // 6 conversions
-			ADC10AE0 |= 0x06;              // Enable analog input on P1.5
-			ret = 1;
-        break;
-
-    default:
-        //#error  Selected channel is not valid.
-        ret = 0;
-       break;
-
+    if ((unsigned)ch >= ADC_MAX_CHANNELS) {
+        return 0;
     }
 
-	return ret;
+    const uint8_t bit = (uint8_t)(1u << (uint8_t)ch);
+
+    P1REN |=  bit;
+    P1OUT &= (uint8_t)~bit;
+    ADC10AE0 |= bit;
+
+    cfg_mask |= bit;
+    recompute_highest();
+
+    ADC10CTL0 &= ~ENC;
+    while (ADC10CTL1 & BUSY) { }
+
+    ADC10CTL1 = (uint16_t)((uint16_t)highest_ch << 12) | CONSEQ_1;
+    ADC10CTL0 = ADC10SHT_2 | MSC | ADC10ON;
+    ADC10DTC1 = (uint8_t)(highest_ch + 1u);
+
+    return 1;
 }
 
 unsigned int GetADCValue(ADC_Channel ch)
 {
-	unsigned int result;
-	
-	ADC10CTL0 &= ~ENC; 				// Disable conversation
-	while (ADC10CTL1 & BUSY);   	// Wait if ADC10 core is active
-	ADC10SA = (unsigned int)adc;	/* Start address of DTC, write is required to 
-												initiate DTC transfers. */
-	ADC10CTL0 |= ENC + ADC10SC;   // Sampling and conversion start
-	
-
-    switch(ch)
-    {
-    case A0:
-			result = adc[0];
-        	break;
-    case A1:
-			result = adc[1];
-        break;
-    case A2:
-			result = adc[2];
-        break;
-    case A3:
-			result = adc[3];
-        break;
-    case A4:
-			result = adc[4];
-        break;
-    case A5:
-			result = adc[5];
-        break;
-
-    default:
-        result = 0;
-       break;
-
+    if ((unsigned)ch >= ADC_MAX_CHANNELS) {
+        return 0;
+    }
+    if (!(cfg_mask & (uint8_t)(1u << (uint8_t)ch))) {
+        return 0;
     }
 
-	return result;
+    ADC10CTL0 &= ~ENC;
+    while (ADC10CTL1 & BUSY) { }
+
+    ADC10SA    = (uint16_t)adc_buf;
+    ADC10CTL0 |= ENC | ADC10SC;
+
+    while (ADC10CTL1 & BUSY) { }
+
+    /* CONSEQ_1 produces A_highest first, A0 last; buffer index is inverted. */
+    return adc_buf[highest_ch - (uint8_t)ch];
 }
